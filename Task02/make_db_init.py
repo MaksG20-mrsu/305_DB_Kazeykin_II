@@ -38,7 +38,7 @@ def export_movies_to_sql(output_handle):
 
     with open(FILE_PATHS["movies"], encoding="utf-8") as movie_file:
         csv_reader = csv.reader(movie_file)
-        next(csv_reader)  # Пропускаем заголовок
+        next(csv_reader)
         for record in csv_reader:
             movie_id, raw_title, genre_list = record
             title_clean, release_year = parse_movie_title(raw_title)
