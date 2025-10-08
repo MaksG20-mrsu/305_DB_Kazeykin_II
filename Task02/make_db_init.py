@@ -39,15 +39,18 @@ def export_movies_to_sql(output_handle):
     with open(FILE_PATHS["movies"], encoding="utf-8") as movie_file:
         csv_reader = csv.reader(movie_file)
         next(csv_reader)
+        values = []
         for record in csv_reader:
             movie_id, raw_title, genre_list = record
             title_clean, release_year = parse_movie_title(raw_title)
             year_value = release_year if release_year is not None else "NULL"
-            output_handle.write(
-                f"INSERT INTO movies (id, title, year, genres) "
-                f"VALUES ({movie_id}, '{sanitize_for_sql(title_clean)}', {year_value}, "
-                f"'{sanitize_for_sql(genre_list)}');\n"
+            values.append(
+                f"({movie_id}, '{sanitize_for_sql(title_clean)}', {year_value}, '{sanitize_for_sql(genre_list)}')"
             )
+        output_handle.write(
+            f"INSERT INTO movies (id, title, year, genres) VALUES\n"
+            f"{',\n'.join(values)};\n\n"
+        )
 
 def export_ratings_to_sql(output_handle):
     output_handle.write("DROP TABLE IF EXISTS ratings;\n")
@@ -64,12 +67,16 @@ def export_ratings_to_sql(output_handle):
     with open(FILE_PATHS["ratings"], encoding="utf-8") as ratings_file:
         csv_reader = csv.reader(ratings_file)
         next(csv_reader)
+        values = []
         for idx, row in enumerate(csv_reader, start=1):
             user_id, movie_id, rating, timestamp = row
-            output_handle.write(
-                f"INSERT INTO ratings (id, user_id, movie_id, rating, timestamp) "
-                f"VALUES ({idx}, {user_id}, {movie_id}, {rating}, '{timestamp}');\n"
+            values.append(
+                f"({idx}, {user_id}, {movie_id}, {rating}, '{timestamp}')"
             )
+        output_handle.write(
+            f"INSERT INTO ratings (id, user_id, movie_id, rating, timestamp) VALUES\n"
+            f"{',\n'.join(values)};\n\n"
+        )
 
 def export_tags_to_sql(output_handle):
     output_handle.write("DROP TABLE IF EXISTS tags;\n")
@@ -86,12 +93,16 @@ def export_tags_to_sql(output_handle):
     with open(FILE_PATHS["tags"], encoding="utf-8") as tags_file:
         csv_reader = csv.reader(tags_file)
         next(csv_reader)
+        values = []
         for idx, row in enumerate(csv_reader, start=1):
             user_id, movie_id, tag_text, timestamp = row
-            output_handle.write(
-                f"INSERT INTO tags (id, user_id, movie_id, tag, timestamp) "
-                f"VALUES ({idx}, {user_id}, {movie_id}, '{sanitize_for_sql(tag_text)}', '{timestamp}');\n"
+            values.append(
+                f"({idx}, {user_id}, {movie_id}, '{sanitize_for_sql(tag_text)}', '{timestamp}')"
             )
+        output_handle.write(
+            f"INSERT INTO tags (id, user_id, movie_id, tag, timestamp) VALUES\n"
+            f"{',\n'.join(values)};\n\n"
+        )
 
 def export_users_to_sql(output_handle):
     output_handle.write("DROP TABLE IF EXISTS users;\n")
@@ -107,16 +118,20 @@ def export_users_to_sql(output_handle):
     )
 
     with open(FILE_PATHS["users"], encoding="utf-8") as users_file:
+        values = []
         for line_num, line in enumerate(users_file, start=1):
             fields = line.strip().split("|")
             if len(fields) < 6:
                 continue
             user_id, full_name, email_addr, gender_val, reg_date, job = fields
-            output_handle.write(
-                f"INSERT INTO users (id, name, email, gender, register_date, occupation) "
-                f"VALUES ({user_id}, '{sanitize_for_sql(full_name)}', '{sanitize_for_sql(email_addr)}', "
-                f"'{gender_val}', '{reg_date}', '{sanitize_for_sql(job)}');\n"
+            values.append(
+                f"({user_id}, '{sanitize_for_sql(full_name)}', '{sanitize_for_sql(email_addr)}', "
+                f"'{gender_val}', '{reg_date}', '{sanitize_for_sql(job)}')"
             )
+        output_handle.write(
+            f"INSERT INTO users (id, name, email, gender, register_date, occupation) VALUES\n"
+            f"{',\n'.join(values)};\n\n"
+        )
 
 def build_sql_script():
     sql_output_file = os.path.join(SCRIPT_DIR, "db_init.sql")
