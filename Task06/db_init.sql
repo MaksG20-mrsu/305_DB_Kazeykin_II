@@ -80,6 +80,7 @@ CREATE TABLE salary_reports (
     FOREIGN KEY (employee_id) REFERENCES employees(id) ON DELETE NO ACTION
 );
 
+
 CREATE INDEX idx_employees_status ON employees(status);
 CREATE INDEX idx_employees_hire_dismiss ON employees(hire_date, dismissal_date);
 
