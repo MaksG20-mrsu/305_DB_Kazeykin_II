@@ -5,9 +5,7 @@ $databaseFile = __DIR__ . '/university.db';
 try {
     $db = new PDO("sqlite:$databaseFile");
     $db->setAttribute(PDO::ATTR_ERRMODE, PDO::ERRMODE_EXCEPTION);
-    echo "Подключение к базе данных установлено.\n";
 
-    // Создание таблиц
     $db->exec("
         CREATE TABLE IF NOT EXISTS groups (
             id INTEGER PRIMARY KEY,
@@ -28,8 +26,6 @@ try {
             FOREIGN KEY (group_id) REFERENCES groups(id)
         )
     ");
-
-    echo "Таблицы groups и students созданы.\n";
 
     $rawStudents = [
         ['1', 'Программная инженерия', 'Зубков Роман Сергеевич', 'М'],
@@ -63,7 +59,6 @@ try {
     $currentYear = (int)date('Y');
     $graduationYear = $currentYear + 3; // группа "действующая"
 
-    // Подготавливаем группы: уникальные (number, program)
     $groups = [];
     foreach ($rawStudents as $s) {
         $key = $s[0] . '|' . $s[1];
@@ -72,7 +67,6 @@ try {
         }
     }
 
-    // Вставляем группы и сохраняем id
     $groupIdMap = [];
     $stmtGroup = $db->prepare("INSERT INTO groups (number, program, graduation_year) VALUES (?, ?, ?)");
     $stmtCheckGroup = $db->prepare("SELECT id FROM groups WHERE number = ? AND program = ?");
@@ -114,9 +108,6 @@ try {
 
         $stmtStudent->execute([$groupId, $name, $gender, $birthDate, $studentId]);
     }
-
-    echo "База данных university.db успешно создана и заполнена!\n";
-    echo "Файл: " . realpath($databaseFile) . "\n";
 
 } catch (PDOException $e) {
     die("Ошибка: " . $e->getMessage() . "\n");
